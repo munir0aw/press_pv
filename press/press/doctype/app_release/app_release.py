@@ -600,7 +600,7 @@ def get_python_path(dirpath: str) -> str:
 					python_path = shutil.which("python3.14")
 					if python_path:
 						return python_path
-					pass  # Fall through to default Python if python3.14 not available
+					return "/usr/bin/python3.14"
 
 	return _get_python_path()
 
