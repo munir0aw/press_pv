@@ -1044,12 +1044,13 @@ class DeployCandidateBuild(Document):
 		settings = self._fetch_registry_settings()
 
 		if settings.docker_registry_namespace:
-			namespace = f"{settings.docker_registry_namespace}/{settings.domain}"
+			repo_name = get_docker_repository_name(settings.domain)
+			self.docker_image_repository = f"{settings.docker_registry_url}/{settings.docker_registry_namespace}/{repo_name}"
 		else:
 			namespace = f"{settings.domain}"
+			self.docker_image_repository = f"{settings.docker_registry_url}/{namespace}/{self.group}"
 
-		self.docker_image_repository = f"{settings.docker_registry_url}/{namespace}/{self.group}"
-		self.docker_image_tag = self.name
+		self.docker_image_tag = self.deploy_candidate
 		self.docker_image = f"{self.docker_image_repository}:{self.docker_image_tag}"
 
 	def check_image_in_registry(self) -> bool:
@@ -1636,6 +1637,12 @@ def _create_arm_build(deploy_candidate: str) -> DeployCandidateBuild:
 	return arm_build.name
 
 
+def get_docker_repository_name(domain: str, suffix: str = "") -> str:
+	"""Return a Docker Hub–safe repository name (one segment)."""
+	base = domain.replace(".", "-").replace("/", "-").lower()
+	return f"{base}-{suffix}".rstrip("-") if suffix else base
+
+
 def query_digitalocean_registry(image: str, group: str, settings: dict[str, str]) -> bool:
 	headers = {
 		"Authorization": f"Bearer {settings['docker_registry_password']}",
@@ -1662,17 +1669,17 @@ def query_digitalocean_registry(image: str, group: str, settings: dict[str, str]
 def is_image_in_registry(image: str, group: str, settings: dict[str, str]) -> bool:
 	headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
 	auth = (settings["docker_registry_username"], settings["docker_registry_password"])
-	namespace = (
-		f"{settings['docker_registry_namespace']}/{settings['domain']}"
-		if settings["docker_registry_namespace"]
-		else settings["domain"]
-	)
 	registry = settings["docker_registry_url"]
 
 	if registry == "registry.digitalocean.com":
 		return query_digitalocean_registry(image, group, settings)
 
-	url = f"https://{registry}/v2/{namespace}/{group}/tags/list"
+	if settings["docker_registry_namespace"]:
+		repo_name = get_docker_repository_name(settings["domain"])
+		url = f"https://{registry}/v2/{settings['docker_registry_namespace']}/{repo_name}/tags/list"
+	else:
+		namespace = settings["domain"]
+		url = f"https://{registry}/v2/{namespace}/{group}/tags/list"
 
 	response = requests.get(url, auth=auth, headers=headers)
 

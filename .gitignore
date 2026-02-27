@@ -172,3 +172,5 @@ press/public/css/marketplace-next.css
 # Vitepress
 docs/.vitepress/cache
 docs/.vitepress/dist
+hetzner_ed25519
+.claude/settings.local.json
