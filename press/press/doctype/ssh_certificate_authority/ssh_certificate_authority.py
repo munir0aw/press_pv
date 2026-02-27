@@ -11,6 +11,9 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
 
+from press.press.doctype.deploy_candidate_build.deploy_candidate_build import (
+	get_docker_repository_name,
+)
 from press.utils import log_error
 
 
@@ -157,11 +160,11 @@ class SSHCertificateAuthority(Document):
 		)
 
 		if settings.docker_registry_namespace:
-			namespace = f"{settings.docker_registry_namespace}/{settings.domain}"
+			repo_name = get_docker_repository_name(settings.domain, "ssh")
+			self.docker_image_repository = f"{settings.docker_registry_url}/{settings.docker_registry_namespace}/{repo_name}"
 		else:
 			namespace = f"{settings.domain}"
-
-		self.docker_image_repository = f"{settings.docker_registry_url}/{namespace}/ssh"
+			self.docker_image_repository = f"{settings.docker_registry_url}/{namespace}/ssh"
 
 		self.docker_image_tag = cint(self.docker_image_tag) + 1
 		self.docker_image = f"{self.docker_image_repository}:{self.docker_image_tag}"
