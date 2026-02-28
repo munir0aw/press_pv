@@ -1,0 +1,23 @@
+name: Deploy to Press Server
+
+on:
+  push:
+    branches:
+      - master-pv
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Press Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRESS_SERVER_IP }}
+          username: root
+          key: ${{ secrets.PRESS_SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/frappe/frappe-bench/apps/press
+            git pull upstream master-pv
+            su - frappe -c "cd /home/frappe/frappe-bench && bench migrate"
+            su - frappe -c "cd /home/frappe/frappe-bench && bench restart"
