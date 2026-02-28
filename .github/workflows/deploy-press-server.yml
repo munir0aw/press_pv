@@ -1,0 +1,37 @@
+name: Deploy to Press Server
+
+on:
+  push:
+    branches:
+      - develp-pv
+
+jobs:
+  merge-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge develp-pv into master-pv
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout master-pv
+          git merge develp-pv --no-edit
+          git push origin master-pv
+
+      - name: Deploy to Press Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRESS_SERVER_IP }}
+          username: root
+          key: ${{ secrets.PRESS_SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/frappe/frappe-bench/apps/press
+            git pull upstream master-pv
+            su - frappe -c "cd /home/frappe/frappe-bench && bench migrate"
+            su - frappe -c "cd /home/frappe/frappe-bench && bench restart"
