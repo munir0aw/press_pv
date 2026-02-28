@@ -3,12 +3,26 @@ name: Deploy to Press Server
 on:
   push:
     branches:
-      - master-pv
+      - develp-pv
 
 jobs:
-  deploy:
+  merge-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge develp-pv into master-pv
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout master-pv
+          git merge develp-pv --no-edit
+          git push origin master-pv
+
       - name: Deploy to Press Server
         uses: appleboy/ssh-action@v1.0.3
         with:
