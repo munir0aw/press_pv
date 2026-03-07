@@ -138,6 +138,7 @@ class PressSettings(Document):
 		press_monitoring_password: DF.Password | None
 		press_trial_plan: DF.Link | None
 		print_format: DF.Data | None
+		production_server_ip: DF.Data | None
 		publish_docs: DF.Check
 		razorpay_key_id: DF.Data | None
 		razorpay_key_secret: DF.Password | None
@@ -235,6 +236,7 @@ class PressSettings(Document):
 				"payment_method.attached",
 				"invoice.payment_action_required",
 				"invoice.payment_succeeded",
+				"invoice.paid",
 				"invoice.payment_failed",
 				"invoice.finalized",
 				"mandate.updated",
