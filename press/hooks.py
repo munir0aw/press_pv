@@ -155,6 +155,7 @@ has_permission = {
 	"Site Database User": "press.overrides.has_permission",
 	"Server Snapshot": "press.overrides.has_permission",
 	"Server Snapshot Recovery": "press.overrides.has_permission",
+	"Server Firewall": "press.press.doctype.server_firewall.server_firewall.has_permission",
 }
 
 # Document Events
@@ -239,6 +240,7 @@ scheduler_events = {
 		"press.press.doctype.server_snapshot.server_snapshot.expire_snapshots",
 		"press.saas.doctype.product_trial.product_trial.sync_product_site_users",
 		"press.press.doctype.database_server.database_server.sync_binlogs_info",
+		"press.press.doctype.database_server.database_server.update_database_schema_sizes",
 		"press.press.doctype.team.team.auto_enable_ssh_access_for_7_days_older_teams",
 	],
 	"hourly_long": [
@@ -276,9 +278,6 @@ scheduler_events = {
 		],
 		"*/2 * * * *": [
 			"press.press.doctype.incident.incident.resolve_incidents",
-		],
-		"45 * * * *": [
-			"press.press.doctype.database_server.database_server.update_database_schema_sizes",
 		],
 		"0 4 * * *": [
 			"press.press.doctype.site.backups.cleanup_offsite",
