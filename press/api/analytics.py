@@ -678,6 +678,9 @@ def get(name, timezone, start, end):
 	plan = frappe.get_cached_doc("Site", name).plan
 	plan_limit = get_plan_config(plan).get("rate_limit", {}).get("limit") if plan else 0
 
+	if not isinstance(request_data, list):
+		request_data = []
+
 	return {
 		"usage_counter": [{"value": r.max, "date": r.date} for r in request_data],
 		"request_count": [{"value": r.count, "date": r.date} for r in request_data],
